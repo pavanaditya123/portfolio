@@ -1,78 +1,82 @@
 import React from 'react';
-import { Github } from 'lucide-react';
-import { SectionHeader } from './ui';
+import { ArrowUpRight } from 'lucide-react';
+import { SectionHeader, Panel, Tag, Readout } from './ui';
+import { projects, links } from '../data/profile';
+import ServiceTopology from './ServiceTopology';
 
-const Projects = () => {
-    return (
-        <section id="projects" className="py-24 reveal-section section-hidden">
-            <SectionHeader title="Featured Projects" />
-            <div className="grid lg:grid-cols-2 gap-8">
-
-                <div className="bg-slate-900/40 backdrop-blur-sm border border-slate-800/80 rounded-3xl p-8 flex flex-col h-full hover:border-indigo-500/50 hover:-translate-y-2 hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-300 group relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/5 rounded-full blur-3xl group-hover:bg-cyan-500/10 transition-colors"></div>
-
-                    <div className="flex justify-between items-start mb-6 relative z-10">
-                        <div>
-                            <h3 className="text-2xl font-bold text-white group-hover:text-indigo-300 transition-colors">Dev Tinder</h3>
-                            <p className="text-slate-400 mt-1">Developer Networking Platform</p>
-                        </div>
-                        <div className="bg-white/5 px-3 py-1 rounded-lg border border-white/10 text-xs font-bold text-slate-300">2026</div>
-                    </div>
-
-                    <div className="flex flex-wrap gap-2 mb-8 relative z-10">
-                        {['Node.js', 'Express', 'React', 'Redux', 'MongoDB', 'AWS'].map(tech => (
-                            <span key={tech} className="px-3 py-1 bg-slate-950/50 text-slate-300 text-xs font-medium rounded-md border border-slate-800">{tech}</span>
-                        ))}
-                    </div>
-
-                    <ul className="space-y-3 text-slate-400 text-sm flex-grow mb-8 relative z-10">
-                        <li className="flex items-start"><span className="mr-3 text-indigo-500 mt-0.5 font-bold">✓</span>Built a full-stack developer networking platform with profile discovery and connection requests.</li>
-                        <li className="flex items-start"><span className="mr-3 text-indigo-500 mt-0.5 font-bold">✓</span>Implemented swipe-style feed logic with pagination and request management.</li>
-                        <li className="flex items-start"><span className="mr-3 text-indigo-500 mt-0.5 font-bold">✓</span>Developed 15+ REST APIs using Node.js and Express with JWT-based authentication.</li>
-                        <li className="flex items-start"><span className="mr-3 text-indigo-500 mt-0.5 font-bold">✓</span>Reduced user feed API response time by <span className="text-emerald-400 font-bold mx-1">30%</span> by adding indexes on frequently queried fields.</li>
-                        <li className="flex items-start"><span className="mr-3 text-indigo-500 mt-0.5 font-bold">✓</span>Deployed backend on AWS EC2 (Linux); used SES for emails and CloudWatch for logging.</li>
-                    </ul>
-
-                    <div className="mt-auto relative z-10 flex gap-4">
-                        <button className="flex items-center text-sm font-semibold text-white bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg transition-colors">
-                            <Github size={16} className="mr-2" /> Code
-                        </button>
-                    </div>
-                </div>
-
-                <div className="bg-slate-900/40 backdrop-blur-sm border border-slate-800/80 rounded-3xl p-8 flex flex-col h-full hover:border-purple-500/50 hover:-translate-y-2 hover:shadow-2xl hover:shadow-purple-500/10 transition-all duration-300 group relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/5 rounded-full blur-3xl group-hover:bg-purple-500/10 transition-colors"></div>
-
-                    <div className="flex justify-between items-start mb-6 relative z-10">
-                        <div>
-                            <h3 className="text-2xl font-bold text-white group-hover:text-purple-300 transition-colors">Live Coding & Interview</h3>
-                            <p className="text-slate-400 mt-1">Real-time Collaboration App</p>
-                        </div>
-                        <div className="bg-white/5 px-3 py-1 rounded-lg border border-white/10 text-xs font-bold text-slate-300">2026 - Present</div>
-                    </div>
-
-                    <div className="flex flex-wrap gap-2 mb-8 relative z-10">
-                        {['React', 'Node.js', 'Express', 'Stream Video', 'Inngest', 'AI'].map(tech => (
-                            <span key={tech} className="px-3 py-1 bg-slate-950/50 text-slate-300 text-xs font-medium rounded-md border border-slate-800">{tech}</span>
-                        ))}
-                    </div>
-
-                    <ul className="space-y-3 text-slate-400 text-sm flex-grow mb-8 relative z-10">
-                        <li className="flex items-start"><span className="mr-3 text-purple-500 mt-0.5 font-bold">✓</span>Building a real-time coding and interview platform with shared code editor, video calls, and chat for two users.</li>
-                        <li className="flex items-start"><span className="mr-3 text-purple-500 mt-0.5 font-bold">✓</span>Achieving under <span className="text-emerald-400 font-bold mx-1">150ms</span> video delay using Stream Video SDK; using Inngest for secure code execution.</li>
-                        <li className="flex items-start"><span className="mr-3 text-purple-500 mt-0.5 font-bold">✓</span>Adding an AI helper that checks code with 10+ test cases and provides helpful hints and error explanations.</li>
-                    </ul>
-
-                    <div className="mt-auto relative z-10 flex gap-4">
-                        <button className="flex items-center text-sm font-semibold text-white bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg transition-colors">
-                            <Github size={16} className="mr-2" /> Code
-                        </button>
-                    </div>
-                </div>
-
-            </div>
-        </section>
-    );
+const TONE = {
+    indigo: 'text-info',
+    cyan: 'text-signal',
+    purple: 'text-accent',
 };
+
+const Projects = () => (
+    <section id="projects" className="py-14 reveal-section section-hidden">
+        <SectionHeader index="03" title="Services" note={`${projects.length} deployed`} />
+
+        <div className="space-y-3">
+            {projects.map((p, idx) => {
+                const repoUrl = `${links.github}/${p.repo}`;
+                return (
+                    <Panel
+                        key={p.title}
+                        label={`svc/${p.repo}`}
+                        meta={`0${idx + 1}`}
+                        status="live"
+                        bodyClass="p-5 md:p-6"
+                    >
+                        <div className="flex flex-wrap items-start justify-between gap-4 mb-5">
+                            <h3 className={`text-lg font-bold ${TONE[p.accent] ?? 'text-ink-bright'}`}>
+                                {p.title}
+                            </h3>
+                            <a
+                                href={repoUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="mono text-[11px] text-ink-mute hover:text-signal transition-colors flex items-center shrink-0"
+                            >
+                                source <ArrowUpRight size={13} className="ml-1" />
+                            </a>
+                        </div>
+
+                        {p.metrics?.length > 0 && (
+                            <div className="flex flex-wrap gap-x-10 gap-y-4 mb-6 pb-6 border-b border-line">
+                                {p.metrics.map((m) => (
+                                    <Readout key={m.label} value={m.value} label={m.label} tone="text-ink-bright" />
+                                ))}
+                            </div>
+                        )}
+
+                        {/* The streaming backend is the one project whose story is
+                            architectural, so it gets the topology drawing. */}
+                        {p.repo === 'streaming_backend_netflix' && (
+                            <div className="mb-6 pb-6 border-b border-line">
+                                <div className="label mb-4">topology</div>
+                                <ServiceTopology />
+                            </div>
+                        )}
+
+                        <ul className="space-y-3 mb-6">
+                            {p.points.map((point, i) => (
+                                <li key={i} className="flex gap-3 text-sm text-ink leading-relaxed">
+                                    <span className="text-ink-dim shrink-0 mono text-[11px] pt-1">
+                                        {String(i + 1).padStart(2, '0')}
+                                    </span>
+                                    <span>{point}</span>
+                                </li>
+                            ))}
+                        </ul>
+
+                        <div className="flex flex-wrap gap-1.5">
+                            {p.stack.map((tech) => (
+                                <Tag key={tech}>{tech}</Tag>
+                            ))}
+                        </div>
+                    </Panel>
+                );
+            })}
+        </div>
+    </section>
+);
 
 export default Projects;

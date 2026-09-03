@@ -1,26 +1,47 @@
 import React from 'react';
-import useCounter from '../hooks/useCounter';
+import useCodingStats from '../hooks/useCodingStats';
+import useCountUp from '../hooks/useCountUp';
+import { handles, education, experience } from '../data/profile';
+
+/** One readout in the top-level gauge strip. */
+const Gauge = ({ value, label, tone, loading, suffix = '' }) => {
+    const shown = useCountUp(typeof value === 'number' ? value : 0);
+    return (
+        <div className="panel panel-ticks px-4 py-3.5">
+            <div className={`num text-xl md:text-2xl font-bold ${tone}`}>
+                {loading ? (
+                    <span className="text-ink-dim">--</span>
+                ) : typeof value === 'number' ? (
+                    `${shown.toLocaleString()}${suffix}`
+                ) : (
+                    value
+                )}
+            </div>
+            <div className="label mt-1.5">{label}</div>
+        </div>
+    );
+};
 
 const StatsBar = () => {
-    const [lc, lcRef] = useCounter(500, 1500);
-    const [apis, apisRef] = useCounter(15, 1200);
-    const [cgpa, cgpaRef] = useCounter(866, 1500);
-
-    const stats = [
-        { label: 'LeetCode Problems', value: `${lc}+`, ref: lcRef, color: 'text-cyan-400' },
-        { label: 'REST APIs Built', value: `${apis}+`, ref: apisRef, color: 'text-purple-400' },
-        { label: 'CGPA', value: (cgpa / 100).toFixed(2), ref: cgpaRef, color: 'text-emerald-400' },
-        { label: 'AI Internship', value: '1', ref: null, color: 'text-amber-400' },
-    ];
+    const lc = useCodingStats('leetcode', handles.leetcode);
+    const gh = useCodingStats('github', handles.github);
 
     return (
-        <div className="animate-fadeInUp delay-800 grid grid-cols-2 md:grid-cols-4 gap-4 mt-16 pt-10 border-t border-white/5">
-            {stats.map((s, i) => (
-                <div key={i} ref={s.ref} className="text-center group">
-                    <div className={`text-3xl md:text-4xl font-black ${s.color} group-hover:scale-110 transition-transform`}>{s.value}</div>
-                    <div className="text-sm text-slate-500 mt-1 font-medium">{s.label}</div>
-                </div>
-            ))}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-3">
+            <Gauge
+                value={lc.data?.totalSolved ?? 0}
+                label="problems solved"
+                tone="text-signal"
+                loading={lc.status === 'loading'}
+            />
+            <Gauge
+                value={gh.data?.contributionTotal ?? 0}
+                label="commits / yr"
+                tone="text-info"
+                loading={gh.status === 'loading'}
+            />
+            <Gauge value={education.cgpa.split(' ')[0]} label="cgpa" tone="text-accent" />
+            <Gauge value={String(experience.length)} label="engineering roles" tone="text-warn" />
         </div>
     );
 };

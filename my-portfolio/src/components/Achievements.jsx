@@ -1,46 +1,52 @@
 import React from 'react';
-import { Award, BookOpen } from 'lucide-react';
-import { AchievementCard, CertBadge } from './ui';
+import { ArrowUpRight } from 'lucide-react';
+import { Panel } from './ui';
+import { achievements, certifications } from '../data/profile';
 
-const Achievements = () => {
-    return (
-        <section className="py-24 reveal-section section-hidden">
-            <div className="grid lg:grid-cols-2 gap-16">
-
-                <div className="bg-gradient-to-b from-slate-900/50 to-transparent p-8 rounded-3xl border border-slate-800/50">
-                    <h3 className="text-2xl font-bold text-white mb-8 flex items-center">
-                        <Award className="mr-4 text-indigo-400" size={32} /> Achievements
-                    </h3>
-                    <div className="space-y-4">
-                        <AchievementCard
-                            text={<span>Solved <span className="text-white font-bold">500+ problems</span> on LeetCode (Rating: 1585).</span>}
-                            link="https://leetcode.com/u/Pavan200053/"
-                        />
-                        <AchievementCard
-                            text={<span>Designed an AI Meeting Intelligence System that extracted tasks and deadlines with <span className="text-white font-bold">95% accuracy</span>.</span>}
-                        />
-                        <AchievementCard
-                            text={<span>Ranked <span className="text-white font-bold">10th college-wide</span> in Data Structures and Algorithms (DSA) problem-solving on GeeksforGeeks.</span>}
-                        />
+const Achievements = () => (
+    <section className="py-14 reveal-section section-hidden">
+        <div className="grid lg:grid-cols-2 gap-3">
+            <Panel label="signals" bodyClass="p-0">
+                {achievements.map((a) => (
+                    <div key={a.text} className="px-5 py-4 border-b border-line last:border-0">
+                        <p className="text-sm text-ink leading-relaxed">
+                            {a.highlight && a.text.includes(a.highlight) ? (
+                                <>
+                                    {a.text.split(a.highlight)[0]}
+                                    <span className="num text-signal font-bold">{a.highlight}</span>
+                                    {a.text.split(a.highlight).slice(1).join(a.highlight)}
+                                </>
+                            ) : (
+                                a.text
+                            )}
+                        </p>
+                        {a.link && (
+                            <a
+                                href={a.link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="mono text-[11px] text-ink-mute hover:text-signal transition-colors inline-flex items-center mt-2.5"
+                            >
+                                verify <ArrowUpRight size={12} className="ml-1" />
+                            </a>
+                        )}
                     </div>
-                </div>
+                ))}
+            </Panel>
 
-                <div className="bg-gradient-to-b from-slate-900/50 to-transparent p-8 rounded-3xl border border-slate-800/50">
-                    <h3 className="text-2xl font-bold text-white mb-8 flex items-center">
-                        <BookOpen className="mr-4 text-cyan-400" size={32} /> Certifications
-                    </h3>
-                    <div className="flex flex-wrap gap-4">
-                        <CertBadge title="Python Programming" issuer="Coursera" />
-                        <CertBadge title="MERN Stack Web Dev" issuer="Namaste Dev" />
-                        <CertBadge title="Data Structures & Algorithms" issuer="TakeUForward" />
-                        <CertBadge title="Interview Preparation" issuer="Meta Coursera" />
-                        <CertBadge title="Object Oriented Programming" issuer="Coursera" />
+            <Panel label="certifications" meta={`${certifications.length}`} bodyClass="p-0">
+                {certifications.map((c) => (
+                    <div
+                        key={c.title}
+                        className="px-5 py-4 border-b border-line last:border-0 flex items-baseline justify-between gap-4"
+                    >
+                        <span className="text-sm text-ink-bright">{c.title}</span>
+                        <span className="mono text-[10px] text-ink-dim shrink-0 text-right">{c.issuer}</span>
                     </div>
-                </div>
-
-            </div>
-        </section>
-    );
-};
+                ))}
+            </Panel>
+        </div>
+    </section>
+);
 
 export default Achievements;

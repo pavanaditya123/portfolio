@@ -1,44 +1,37 @@
 import React from 'react';
-import { Terminal, Code2, Database, BrainCircuit } from 'lucide-react';
-import { SectionHeader, SkillCategory } from './ui';
+import { SectionHeader, Panel, Tag } from './ui';
+import { skills } from '../data/profile';
 
-const Skills = () => {
-    return (
-        <section id="skills" className="py-24 reveal-section section-hidden">
-            <SectionHeader title="Technical Skills" />
-            <div className="grid md:grid-cols-2 gap-6">
-
-                <SkillCategory
-                    icon={<Terminal size={22} className="text-cyan-400" />}
-                    title="Languages"
-                    colorClass="hover:border-cyan-500/50"
-                    skills={['Python', 'NumPy', 'Pandas', 'C++', 'Java', 'JavaScript', 'C']}
-                />
-
-                <SkillCategory
-                    icon={<BrainCircuit size={22} className="text-purple-400" />}
-                    title="Machine Learning & NLP"
-                    colorClass="hover:border-purple-500/50"
-                    skills={['Scikit-Learn', 'Perceptron', 'Tokenization', 'Regex', 'N-grams', 'Bigrams']}
-                />
-
-                <SkillCategory
-                    icon={<Code2 size={22} className="text-blue-400" />}
-                    title="Web Development"
-                    colorClass="hover:border-blue-500/50"
-                    skills={['React', 'Redux', 'Node.js', 'Express.js', 'Tailwind CSS', 'HTML5', 'CSS', 'Daisy UI']}
-                />
-
-                <SkillCategory
-                    icon={<Database size={22} className="text-emerald-400" />}
-                    title="Databases & Tools"
-                    colorClass="hover:border-emerald-500/50"
-                    skills={['MongoDB', 'MySQL', 'Git', 'Inngest', 'Stream SDK', 'OpenAI API', 'AWS (EC2, SES)']}
-                />
-
-            </div>
-        </section>
-    );
+const TONE = {
+    indigo: '#58a6ff',
+    cyan: '#3fb950',
+    purple: '#bc8cff',
+    emerald: '#3fb950',
+    amber: '#d29922',
 };
+
+const Skills = () => (
+    <section id="skills" className="py-14 reveal-section section-hidden">
+        <SectionHeader index="04" title="Capability matrix" note={`${skills.length} groups`} />
+
+        <Panel label="stack" bodyClass="p-0">
+            {skills.map((group) => (
+                <div
+                    key={group.title}
+                    className="grid md:grid-cols-4 gap-4 px-5 py-4 border-b border-line last:border-0"
+                >
+                    <div className="label pt-1" style={{ color: TONE[group.color] }}>
+                        {group.title}
+                    </div>
+                    <div className="md:col-span-3 flex flex-wrap gap-1.5">
+                        {group.items.map((item) => (
+                            <Tag key={item}>{item}</Tag>
+                        ))}
+                    </div>
+                </div>
+            ))}
+        </Panel>
+    </section>
+);
 
 export default Skills;

@@ -1,88 +1,121 @@
 import React, { useState, useEffect } from 'react';
-import { Linkedin, Mail, Code2, Download, ChevronDown } from 'lucide-react';
-import { SocialLink } from './ui';
+import { ArrowRight, Download } from 'lucide-react';
+import { profile, links, contact, education, RESUME_PATH } from '../data/profile';
+import { Panel, Status } from './ui';
 import StatsBar from './StatsBar';
 
-const Hero = ({ scrollToSection }) => {
-    const [typedText, setTypedText] = useState('');
-    const [showCursor, setShowCursor] = useState(true);
-    const fullText = 'Full-Stack Developer focused on AI/LLM features.';
+const TYPE_SPEED = 52;
+const ERASE_SPEED = 26;
+const HOLD = 1700;
+
+/** Types each role, holds, erases, advances. */
+function useRotatingText(words) {
+    const [index, setIndex] = useState(0);
+    const [text, setText] = useState('');
+    const [erasing, setErasing] = useState(false);
 
     useEffect(() => {
-        let i = 0;
-        const timer = setInterval(() => {
-            if (i < fullText.length) {
-                setTypedText(fullText.slice(0, i + 1));
-                i++;
-            } else {
-                clearInterval(timer);
-                setTimeout(() => setShowCursor(false), 2000);
-            }
-        }, 50);
-        return () => clearInterval(timer);
-    }, []);
+        const word = words[index % words.length];
+
+        if (!erasing && text === word) {
+            const hold = setTimeout(() => setErasing(true), HOLD);
+            return () => clearTimeout(hold);
+        }
+        if (erasing && text === '') {
+            // Advancing the typing state machine one step per tick.
+            // eslint-disable-next-line react-hooks/set-state-in-effect
+            setErasing(false);
+            setIndex((i) => (i + 1) % words.length);
+            return undefined;
+        }
+
+        const timer = setTimeout(
+            () => setText(erasing ? word.slice(0, text.length - 1) : word.slice(0, text.length + 1)),
+            erasing ? ERASE_SPEED : TYPE_SPEED,
+        );
+        return () => clearTimeout(timer);
+    }, [text, erasing, index, words]);
+
+    return text;
+}
+
+const META = [
+    ['host', 'bengaluru.in'],
+    ['role', 'backend / distributed systems / applied ai'],
+    ['edu', `${education.school.toLowerCase()} · cgpa ${education.cgpa.split(' ')[0]}`],
+];
+
+const Hero = ({ scrollToSection }) => {
+    const typed = useRotatingText(profile.roles);
 
     return (
-        <section id="home" className="min-h-[90vh] flex flex-col justify-center py-20 relative">
-
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[600px] opacity-30 pointer-events-none -z-10 flex justify-center items-center">
-                <div className="absolute w-[400px] h-[400px] bg-indigo-600 rounded-full mix-blend-screen filter blur-[100px] animate-pulse"></div>
-                <div className="absolute w-[300px] h-[300px] bg-cyan-500 rounded-full mix-blend-screen filter blur-[100px] translate-x-32 -translate-y-32 animate-float"></div>
-                <div className="absolute w-[350px] h-[350px] bg-purple-600 rounded-full mix-blend-screen filter blur-[100px] -translate-x-32 translate-y-32"></div>
-            </div>
-
-            <div className="relative">
-                <div className="animate-fadeInUp inline-flex items-center space-x-2 bg-indigo-500/10 text-indigo-300 px-4 py-2 rounded-full text-sm font-semibold mb-8 w-fit border border-indigo-500/20 shadow-[0_0_15px_rgba(99,102,241,0.2)]">
-                    <span className="relative flex h-2.5 w-2.5">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-indigo-500"></span>
-                    </span>
-                    <span>Seeking Software Development Internship</span>
+        <section id="home" className="pt-10 pb-16">
+            <Panel
+                label="system · identity"
+                meta={`uid: ${contact.email}`}
+                status="live"
+                bodyClass="p-6 md:p-10"
+            >
+                <div className="flex flex-wrap items-center gap-3 mb-8">
+                    <Status tone="accent">{profile.status}</Status>
+                    <Status tone="signal">available</Status>
                 </div>
 
-                <h1 className="animate-fadeInUp delay-200 text-5xl md:text-8xl font-black text-white mb-6 tracking-tight leading-[1.1]">
-                    Hi, I'm <br className="hidden md:block" />
-                    <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent animate-shimmer">
-                        Pavan Aditya
-                    </span>
+                <h1 className="mono text-4xl md:text-6xl font-extrabold text-ink-bright tracking-tight leading-[1.05] mb-5">
+                    {profile.name.split(' ').slice(-2).join(' ')}
                 </h1>
 
-                <h2 className="animate-fadeInUp delay-400 text-2xl md:text-3xl font-medium text-slate-400 mb-8 max-w-3xl leading-snug">
-                    <span className={showCursor ? 'typing-cursor' : ''}>{typedText}</span>
-                </h2>
-
-                <p className="animate-fadeInUp delay-500 text-lg text-slate-400 max-w-2xl mb-12 leading-relaxed">
-                    I'm a computer science student building full-stack MERN applications. I enjoy integrating AI components—like LLMs and Agentic RAG—into everyday web tools to make them more useful.
+                <p className="mono text-base md:text-lg text-signal mb-8 min-h-[1.75rem]">
+                    <span className="text-ink-dim">$ </span>
+                    <span className="typing-cursor">{typed}</span>
                 </p>
 
-                <div className="animate-fadeInUp delay-600 flex flex-wrap items-center gap-5">
+                <p className="text-ink max-w-2xl leading-relaxed mb-9">{profile.tagline}</p>
+
+                <dl className="grid sm:grid-cols-3 gap-x-8 gap-y-3 mb-9 pb-9 border-b border-line">
+                    {META.map(([k, v]) => (
+                        <div key={k} className="flex gap-3 min-w-0">
+                            <dt className="mono text-[11px] text-ink-dim shrink-0 w-9">{k}</dt>
+                            <dd className="mono text-[11px] text-ink-mute truncate">{v}</dd>
+                        </div>
+                    ))}
+                </dl>
+
+                <div className="flex flex-wrap items-center gap-3">
                     <button
                         onClick={() => scrollToSection('contact')}
-                        className="px-8 py-3.5 bg-white text-slate-950 hover:bg-indigo-50 rounded-xl font-bold transition-all hover:scale-105 active:scale-95 flex items-center shadow-[0_0_20px_rgba(255,255,255,0.1)]"
+                        className="mono text-xs font-bold uppercase tracking-[0.1em] px-5 py-3 bg-signal text-bg hover:bg-signal/85 transition-colors flex items-center"
                     >
-                        Get In Touch
+                        Open channel <ArrowRight size={14} className="ml-2" />
                     </button>
-                    <button
-                        onClick={() => window.print()}
-                        className="px-8 py-3.5 bg-white/5 border border-white/10 hover:bg-white/10 text-white rounded-xl font-semibold transition-all hover:scale-105 active:scale-95 flex items-center"
+                    <a
+                        href={RESUME_PATH}
+                        download
+                        className="mono text-xs font-bold uppercase tracking-[0.1em] px-5 py-3 border border-line-bright text-ink hover:text-ink-bright hover:border-signal transition-colors flex items-center"
                     >
-                        <Download size={18} className="mr-2" /> Resume
-                    </button>
-
-                    <div className="flex items-center space-x-3 md:ml-4 mt-4 md:mt-0 w-full md:w-auto">
-                        <SocialLink href="https://linkedin.com/in/pavan-aditya-75a8b8286" icon={<Linkedin size={22} />} />
-                        <SocialLink href="mailto:Pavanadi88@gmail.com" icon={<Mail size={22} />} />
-                        <SocialLink href="https://leetcode.com/u/Pavan200053/" icon={<Code2 size={22} />} title="LeetCode" />
+                        <Download size={14} className="mr-2" /> resume.pdf
+                    </a>
+                    <div className="flex items-center gap-4 sm:ml-3">
+                        {[
+                            ['github', links.github],
+                            ['linkedin', links.linkedin],
+                            ['leetcode', links.leetcode],
+                        ].map(([name, href]) => (
+                            <a
+                                key={name}
+                                href={href}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="mono text-[11px] text-ink-mute hover:text-signal transition-colors underline-offset-4 hover:underline"
+                            >
+                                {name}
+                            </a>
+                        ))}
                     </div>
                 </div>
+            </Panel>
 
-                <StatsBar />
-            </div>
-
-            <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center animate-bounce text-slate-500 cursor-pointer hidden md:flex" onClick={() => scrollToSection('about')}>
-                <span className="text-xs tracking-widest uppercase mb-2">Scroll</span>
-                <ChevronDown size={20} />
-            </div>
+            <StatsBar />
         </section>
     );
 };

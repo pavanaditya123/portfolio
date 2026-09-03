@@ -1,74 +1,242 @@
 @import "tailwindcss";
 
-/* Premium Font */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+/* ============================================================
+   Observability console
+   ------------------------------------------------------------
+   The visual language of a monitoring tool: dense panels, hard
+   1px borders, monospace numerics, and signal colours that mean
+   something (green healthy, amber warn, red critical). No blur,
+   no gradients, no rounded glass -- the restraint is the point.
+   ============================================================ */
 
-/* Global Styles */
+@theme {
+    --color-bg: #0a0c10;
+    --color-panel: #0d1117;
+    --color-panel-2: #11161e;
+    --color-line: #1e2530;
+    --color-line-bright: #2f3947;
+
+    --color-ink: #c9d1d9;
+    --color-ink-bright: #f0f6fc;
+    --color-ink-mute: #6e7781;
+    --color-ink-dim: #4a515c;
+
+    --color-signal: #3fb950;
+    --color-warn: #d29922;
+    --color-crit: #f85149;
+    --color-info: #58a6ff;
+    --color-accent: #bc8cff;
+
+    --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
 html {
     scroll-behavior: smooth;
 }
 
 body {
+    background-color: #0a0c10;
+    color: #c9d1d9;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
 
-/* Scrollbar */
 ::-webkit-scrollbar {
-    width: 8px;
+    width: 10px;
+    height: 10px;
 }
 
 ::-webkit-scrollbar-track {
-    background: #030712;
+    background: #0a0c10;
 }
 
 ::-webkit-scrollbar-thumb {
-    background: #1e293b;
-    border-radius: 10px;
+    background: #1e2530;
+    border: 2px solid #0a0c10;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: #334155;
+    background: #2f3947;
 }
 
-/* Animations */
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(30px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+::selection {
+    background: rgba(63, 185, 80, 0.25);
+    color: #f0f6fc;
 }
 
-@keyframes fadeInLeft {
-    from {
-        opacity: 0;
-        transform: translateX(-30px);
-    }
+/* ---------------------------- panel chrome ---------------------------- */
 
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
+.panel {
+    background: #0d1117;
+    border: 1px solid #1e2530;
+    position: relative;
+    transition: border-color 0.18s ease;
 }
 
-@keyframes shimmer {
+.panel:hover {
+    border-color: #2f3947;
+}
+
+/* Corner ticks. Cheap detail that reads as instrumentation rather than
+   decoration, and the reason the panels feel machined instead of boxy. */
+.panel-ticks::before,
+.panel-ticks::after {
+    content: '';
+    position: absolute;
+    width: 5px;
+    height: 5px;
+    border-color: #3fb950;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    pointer-events: none;
+}
+
+.panel-ticks::before {
+    top: -1px;
+    left: -1px;
+    border-top: 1px solid;
+    border-left: 1px solid;
+}
+
+.panel-ticks::after {
+    bottom: -1px;
+    right: -1px;
+    border-bottom: 1px solid;
+    border-right: 1px solid;
+}
+
+.panel-ticks:hover::before,
+.panel-ticks:hover::after {
+    opacity: 1;
+}
+
+.panel-head {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding: 0.5rem 0.875rem;
+    border-bottom: 1px solid #1e2530;
+    background: #11161e;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: #6e7781;
+}
+
+/* --------------------------- status indicators ------------------------- */
+
+.dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    flex-shrink: 0;
+    position: relative;
+}
+
+.dot-live {
+    background: #3fb950;
+    box-shadow: 0 0 0 0 rgba(63, 185, 80, 0.6);
+    animation: pulseRing 2.4s ease-out infinite;
+}
+
+@keyframes pulseRing {
     0% {
-        background-position: 0% 50%;
+        box-shadow: 0 0 0 0 rgba(63, 185, 80, 0.55);
     }
 
-    50% {
-        background-position: 100% 50%;
+    70% {
+        box-shadow: 0 0 0 7px rgba(63, 185, 80, 0);
     }
 
     100% {
-        background-position: 0% 50%;
+        box-shadow: 0 0 0 0 rgba(63, 185, 80, 0);
     }
+}
+
+/* ------------------------------ typography ----------------------------- */
+
+.mono {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-variant-ligatures: none;
+}
+
+.num {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+}
+
+.label {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: #6e7781;
+}
+
+/* ------------------------------ background ----------------------------- */
+
+/* Graph-paper grid, faded at the edges. Static -- the animated particle
+   field was the single most template-looking thing on the old page. */
+.console-grid {
+    position: fixed;
+    inset: 0;
+    z-index: -10;
+    pointer-events: none;
+    background-image:
+        linear-gradient(rgba(47, 57, 71, 0.28) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(47, 57, 71, 0.28) 1px, transparent 1px);
+    background-size: 64px 64px;
+    mask-image: radial-gradient(ellipse 120% 90% at 50% 0%, #000 15%, transparent 75%);
+    -webkit-mask-image: radial-gradient(ellipse 120% 90% at 50% 0%, #000 15%, transparent 75%);
+}
+
+.scanline {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    opacity: 0.35;
+    background: repeating-linear-gradient(0deg,
+            transparent 0px,
+            transparent 2px,
+            rgba(0, 0, 0, 0.22) 3px,
+            rgba(0, 0, 0, 0.22) 4px);
+}
+
+.scroll-rail {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 2px;
+    z-index: 60;
+    background: #3fb950;
+    transition: width 0.1s linear;
+}
+
+/* ------------------------------- reveal -------------------------------- */
+
+.section-hidden {
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.section-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.typing-cursor::after {
+    content: '\2588';
+    animation: blink 1.05s step-end infinite;
+    color: #3fb950;
+    margin-left: 2px;
 }
 
 @keyframes blink {
@@ -83,162 +251,15 @@ body {
     }
 }
 
-@keyframes float {
+@media (prefers-reduced-motion: reduce) {
 
-    0%,
-    100% {
-        transform: translateY(0);
+    .dot-live,
+    .typing-cursor::after {
+        animation: none;
     }
 
-    50% {
-        transform: translateY(-10px);
-    }
-}
-
-@keyframes slideInRight {
-    from {
-        transform: translateX(100%);
-        opacity: 0;
-    }
-
-    to {
-        transform: translateX(0);
+    .section-hidden {
         opacity: 1;
+        transform: none;
     }
-}
-
-@keyframes scaleIn {
-    from {
-        transform: scale(0.8);
-        opacity: 0;
-    }
-
-    to {
-        transform: scale(1);
-        opacity: 1;
-    }
-}
-
-@keyframes gradientMove {
-    0% {
-        background-position: 0% 50%;
-    }
-
-    50% {
-        background-position: 100% 50%;
-    }
-
-    100% {
-        background-position: 0% 50%;
-    }
-}
-
-/* Utility Classes */
-.animate-fadeInUp {
-    animation: fadeInUp 0.8s ease-out forwards;
-    opacity: 0;
-}
-
-.animate-fadeInLeft {
-    animation: fadeInLeft 0.8s ease-out forwards;
-    opacity: 0;
-}
-
-.animate-shimmer {
-    background-size: 200% 200%;
-    animation: shimmer 3s ease-in-out infinite;
-}
-
-.animate-float {
-    animation: float 3s ease-in-out infinite;
-}
-
-.animate-scaleIn {
-    animation: scaleIn 0.5s ease-out forwards;
-    opacity: 0;
-}
-
-.typing-cursor::after {
-    content: '|';
-    animation: blink 1s step-end infinite;
-    color: #818cf8;
-    font-weight: 300;
-}
-
-/* Stagger delays */
-.delay-100 {
-    animation-delay: 0.1s;
-}
-
-.delay-200 {
-    animation-delay: 0.2s;
-}
-
-.delay-300 {
-    animation-delay: 0.3s;
-}
-
-.delay-400 {
-    animation-delay: 0.4s;
-}
-
-.delay-500 {
-    animation-delay: 0.5s;
-}
-
-.delay-600 {
-    animation-delay: 0.6s;
-}
-
-.delay-700 {
-    animation-delay: 0.7s;
-}
-
-.delay-800 {
-    animation-delay: 0.8s;
-}
-
-/* Section reveal on scroll */
-.section-hidden {
-    opacity: 0;
-    transform: translateY(40px);
-    transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.section-visible {
-    opacity: 1;
-    transform: translateY(0);
-}
-
-/* Gradient border animation */
-.gradient-border {
-    position: relative;
-}
-
-.gradient-border::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, #6366f1, #a855f7, #06b6d4, #6366f1);
-    background-size: 200% 100%;
-    animation: gradientMove 3s linear infinite;
-    border-radius: 999px;
-    opacity: 0;
-    transition: opacity 0.3s;
-}
-
-.gradient-border:hover::before {
-    opacity: 1;
-}
-
-/* Chatbot styles */
-.chatbot-container {
-    animation: slideInRight 0.4s ease-out;
-}
-
-.chat-message {
-    animation: fadeInUp 0.3s ease-out;
 }

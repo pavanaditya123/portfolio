@@ -1,40 +1,60 @@
 import React from 'react';
-import { Mail, Phone, Linkedin, Code2 } from 'lucide-react';
+import { SectionHeader, Panel } from './ui';
+import { contact, links, profile, RESUME_PATH } from '../data/profile';
 
-const Contact = () => {
-    return (
-        <section id="contact" className="py-24 border-t border-white/5 reveal-section section-hidden">
-            <div className="bg-gradient-to-br from-indigo-900/20 to-purple-900/20 border border-white/10 rounded-3xl p-12 text-center relative overflow-hidden">
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-indigo-500/20 rounded-full blur-[100px] -z-10 pointer-events-none"></div>
+const endpoints = [
+    { method: 'MAIL', path: contact.email, href: `mailto:${contact.email}` },
+    { method: 'TEL', path: contact.phone, href: contact.phoneHref },
+    { method: 'GET', path: 'github.com/pavanaditya123', href: links.github },
+    { method: 'GET', path: 'linkedin.com/in/pavan-aditya', href: links.linkedin },
+    { method: 'GET', path: 'leetcode.com/u/Pavan200053', href: links.leetcode },
+    { method: 'GET', path: 'resume.pdf', href: RESUME_PATH },
+].filter((e) => Boolean(e.href));
 
-                <h2 className="text-4xl md:text-5xl font-black text-white mb-6 tracking-tight">Let's Connect.</h2>
-                <p className="text-lg text-slate-300 max-w-2xl mx-auto mb-10 leading-relaxed">
-                    I'm currently seeking a Software Development internship to apply my skills in real-world projects. Whether you have an open position or just want to network, my inbox is open.
+const Contact = () => (
+    <section id="contact" className="py-14 reveal-section section-hidden">
+        <SectionHeader index="07" title="Endpoints" note="contact" />
+
+        <Panel label="open channels" status="live" bodyClass="p-0">
+            <div className="px-5 py-6 border-b border-line">
+                <h2 className="mono text-xl md:text-2xl font-bold text-ink-bright mb-3">
+                    Let's build something.
+                </h2>
+                <p className="text-sm text-ink leading-relaxed max-w-2xl">
+                    Open to software engineering roles and internships — backend, distributed
+                    systems, and applied AI especially. Fastest reply is email.
                 </p>
+            </div>
 
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-10">
-                    <a href="mailto:Pavanadi88@gmail.com" className="flex items-center px-6 py-4 bg-white text-slate-900 rounded-xl font-bold hover:scale-105 transition-transform shadow-[0_0_20px_rgba(255,255,255,0.1)]">
-                        <Mail className="mr-3" size={20} /> Pavanadi88@gmail.com
-                    </a>
-                    <span className="flex items-center px-6 py-4 bg-white/5 border border-white/10 text-white rounded-xl font-medium">
-                        <Phone className="mr-3 text-indigo-400" size={20} /> +91-6304702569
+            {endpoints.map((e) => (
+                <a
+                    key={e.path}
+                    href={e.href}
+                    {...(e.method === 'GET' ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                    className="flex items-center gap-4 px-5 py-3.5 border-b border-line last:border-0 hover:bg-panel-2 transition-colors group"
+                >
+                    <span className="mono text-[10px] font-bold text-ink-dim w-10 shrink-0">
+                        {e.method}
                     </span>
-                </div>
-            </div>
+                    <span className="mono text-xs text-ink group-hover:text-signal transition-colors truncate">
+                        {e.path}
+                    </span>
+                    <span className="mono text-[10px] text-ink-dim ml-auto shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                        200 OK
+                    </span>
+                </a>
+            ))}
+        </Panel>
 
-            <div className="pt-12 flex flex-col md:flex-row items-center justify-between text-sm text-slate-500">
-                <p>© {new Date().getFullYear()} Muttavarapu Pavan Aditya.</p>
-                <div className="flex space-x-8 mt-6 md:mt-0">
-                    <a href="https://linkedin.com/in/pavan-aditya-75a8b8286" target="_blank" rel="noreferrer" className="flex items-center hover:text-white transition-colors">
-                        <Linkedin size={16} className="mr-2" /> LinkedIn
-                    </a>
-                    <a href="https://leetcode.com/u/Pavan200053/" target="_blank" rel="noreferrer" className="flex items-center hover:text-white transition-colors">
-                        <Code2 size={16} className="mr-2" /> LeetCode
-                    </a>
-                </div>
-            </div>
-        </section>
-    );
-};
+        <div className="flex flex-wrap items-center justify-between gap-3 mt-6 pt-5 border-t border-line">
+            <p className="mono text-[10px] text-ink-dim">
+                © {new Date().getFullYear()} {profile.name.toLowerCase()}
+            </p>
+            <p className="mono text-[10px] text-ink-dim">
+                built with react · vite · live platform apis
+            </p>
+        </div>
+    </section>
+);
 
 export default Contact;

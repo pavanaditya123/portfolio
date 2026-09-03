@@ -1,62 +1,81 @@
 import React from 'react';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, Download } from 'lucide-react';
+import { RESUME_PATH } from '../data/profile';
 
-const NAV_ITEMS = ['Home', 'About', 'Experience', 'Projects', 'Skills', 'Contact'];
+const NAV_ITEMS = [
+    ['01', 'about'], ['02', 'experience'], ['03', 'projects'],
+    ['04', 'skills'], ['05', 'coding'], ['06', 'resume'], ['07', 'contact'],
+];
 
-const Navbar = ({ activeSection, mobileMenuOpen, setMobileMenuOpen, scrollToSection }) => {
-    return (
-        <nav className="fixed top-0 left-0 right-0 z-50 bg-[#030712]/80 backdrop-blur-xl border-b border-white/5 transition-all duration-300">
-            <div className="max-w-6xl mx-auto px-6">
-                <div className="flex items-center justify-between h-20">
-                    <span
-                        className="text-2xl font-black tracking-tighter bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-400 bg-clip-text text-transparent cursor-pointer animate-shimmer"
-                        onClick={() => scrollToSection('home')}
-                    >
-                        Portfolio.
-                    </span>
+const Navbar = ({ activeSection, mobileMenuOpen, setMobileMenuOpen, scrollToSection }) => (
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-bg/92 backdrop-blur-sm border-b border-line">
+        <div className="max-w-5xl mx-auto px-5">
+            <div className="flex items-center justify-between h-14">
+                <button
+                    className="mono text-xs font-bold text-ink-bright tracking-tight flex items-center gap-2"
+                    onClick={() => scrollToSection('home')}
+                >
+                    <span className="dot dot-live" />
+                    pavan_aditya
+                </button>
 
-                    <div className="hidden md:flex space-x-1 bg-white/5 p-1 rounded-full border border-white/10">
-                        {NAV_ITEMS.map((item) => (
-                            <button
-                                key={item}
-                                onClick={() => scrollToSection(item.toLowerCase())}
-                                className={`px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 ${activeSection === item.toLowerCase()
-                                    ? 'bg-white/10 text-white shadow-sm'
-                                    : 'text-slate-400 hover:text-white hover:bg-white/5'
-                                    }`}
-                            >
-                                {item}
-                            </button>
-                        ))}
-                    </div>
-
-                    <button
-                        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                        className="md:hidden text-slate-300 p-2 hover:bg-white/10 rounded-lg transition-colors"
-                    >
-                        {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-                    </button>
-                </div>
-            </div>
-
-            {mobileMenuOpen && (
-                <div className="md:hidden bg-[#030712]/95 backdrop-blur-xl border-t border-white/5 px-6 py-4 space-y-1 animate-fadeInUp" style={{ animationDuration: '0.3s' }}>
-                    {NAV_ITEMS.map((item) => (
+                <div className="hidden lg:flex items-center gap-1">
+                    {NAV_ITEMS.map(([num, item]) => (
                         <button
                             key={item}
-                            onClick={() => scrollToSection(item.toLowerCase())}
-                            className={`block w-full text-left px-4 py-3 rounded-xl text-sm font-medium transition-all ${activeSection === item.toLowerCase()
-                                ? 'bg-indigo-500/10 text-indigo-300 border border-indigo-500/20'
-                                : 'text-slate-400 hover:text-white hover:bg-white/5'
+                            onClick={() => scrollToSection(item)}
+                            className={`mono text-[11px] px-2.5 py-1.5 transition-colors ${activeSection === item
+                                ? 'text-signal'
+                                : 'text-ink-mute hover:text-ink-bright'
                                 }`}
                         >
+                            <span className="text-ink-dim mr-1.5">{num}</span>
                             {item}
                         </button>
                     ))}
+                    <a
+                        href={RESUME_PATH}
+                        download
+                        className="mono text-[11px] font-bold ml-3 px-3 py-1.5 border border-line-bright text-ink hover:text-signal hover:border-signal transition-colors flex items-center"
+                    >
+                        <Download size={12} className="mr-1.5" /> cv
+                    </a>
                 </div>
-            )}
-        </nav>
-    );
-};
+
+                <button
+                    onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                    className="lg:hidden text-ink-mute hover:text-ink-bright p-1.5 transition-colors"
+                    aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+                    aria-expanded={mobileMenuOpen}
+                >
+                    {mobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
+                </button>
+            </div>
+        </div>
+
+        {mobileMenuOpen && (
+            <div className="lg:hidden border-t border-line bg-panel">
+                {NAV_ITEMS.map(([num, item]) => (
+                    <button
+                        key={item}
+                        onClick={() => scrollToSection(item)}
+                        className={`mono text-xs w-full text-left px-5 py-3 border-b border-line transition-colors ${activeSection === item ? 'text-signal' : 'text-ink-mute'
+                            }`}
+                    >
+                        <span className="text-ink-dim mr-2.5">{num}</span>
+                        {item}
+                    </button>
+                ))}
+                <a
+                    href={RESUME_PATH}
+                    download
+                    className="mono text-xs font-bold flex items-center px-5 py-3 text-signal"
+                >
+                    <Download size={13} className="mr-2" /> download cv
+                </a>
+            </div>
+        )}
+    </nav>
+);
 
 export default Navbar;
