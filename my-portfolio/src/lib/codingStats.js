@@ -7,7 +7,8 @@
 // endpoint is down the last good response is served stale rather than showing
 // an empty card.
 
-const CACHE_TTL = 6 * 60 * 60 * 1000; // 6 hours
+const CACHE_TTL = 6 * 60 * 60 * 1000;   // hard limit: block on a fetch past this
+export const SOFT_TTL = 15 * 60 * 1000; // past this, serve cache but refresh behind it
 const TIMEOUT = 12000;
 
 /* ------------------------------ event bus ------------------------------- */
@@ -51,9 +52,9 @@ const num = (v) => {
     return Number.isFinite(n) ? n : 0;
 };
 
-async function getJSON(url) {
+async function getJSON(url, timeout = TIMEOUT) {
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), TIMEOUT);
+    const timer = setTimeout(() => controller.abort(), timeout);
     try {
         const res = await fetch(url, {
             signal: controller.signal,
@@ -69,9 +70,9 @@ async function getJSON(url) {
 // Walk a list of [url, parser] pairs, returning the first parse that succeeds.
 async function firstSuccess(sources) {
     let lastErr;
-    for (const [url, parse] of sources) {
+    for (const [url, parse, timeout] of sources) {
         try {
-            const parsed = parse(await getJSON(url));
+            const parsed = parse(await getJSON(url, timeout));
             if (parsed) return parsed;
             throw new Error('empty payload');
         } catch (err) {
@@ -91,7 +92,15 @@ const isoDay = (d) => d.toISOString().slice(0, 10);
  * sparse map into a dense run of the last `span` days so it can be drawn on
  * the same grid as the GitHub calendar.
  */
-function calendarFromEpochMap(map, span = 365) {
+function calendarFromEpochMap(input, span = 365) {
+    let map = input;
+    if (typeof map === 'string') {
+        try {
+            map = JSON.parse(map);
+        } catch {
+            return [];
+        }
+    }
     if (!map || typeof map !== 'object') return [];
     const counts = new Map();
     for (const [ts, count] of Object.entries(map)) {
@@ -189,7 +198,7 @@ const parseLeetCode = (d) => {
  * holding up the main LeetCode card.
  */
 async function fetchLeetCodeContest(u) {
-    const d = await getJSON(`https://alfa-leetcode-api.onrender.com/${u}/contest`);
+    const d = await getJSON(`https://alfa-leetcode-api.onrender.com/${u}/contest`, 30000);
     const rating = num(d?.contestRating);
     if (!rating) throw new Error('no contest history');
     return {
@@ -201,11 +210,15 @@ async function fetchLeetCodeContest(u) {
     };
 }
 
+// Order is fast-then-reliable. The first mirror is quick but shares a rate
+// limit and returns 429 under load; the second is dependable but sits on a
+// cold-starting free tier, so it gets a much longer timeout. The old Heroku
+// mirror was removed -- it has been returning an application error page, so
+// keeping it only added a timeout to every failure path.
 const fetchLeetCode = (u) =>
     firstSuccess([
-        [`https://leetcode-api-faisalshohag.vercel.app/${u}`, parseLeetCode],
-        [`https://alfa-leetcode-api.onrender.com/userProfile/${u}`, parseLeetCode],
-        [`https://leetcode-stats-api.herokuapp.com/${u}`, parseLeetCode],
+        [`https://leetcode-api-faisalshohag.vercel.app/${u}`, parseLeetCode, 9000],
+        [`https://alfa-leetcode-api.onrender.com/userProfile/${u}`, parseLeetCode, 30000],
     ]);
 
 /* ------------------------------ Codeforces ------------------------------ */

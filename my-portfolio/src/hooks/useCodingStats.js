@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { getStats } from '../lib/codingStats';
+import { getStats, SOFT_TTL } from '../lib/codingStats';
 
 /**
  * Load one platform's stats.
@@ -36,6 +36,28 @@ export default function useCodingStats(platform, handle, nonce = 0) {
                 const { data, stale, fetchedAt } = await getStats(platform, handle, { force });
                 if (!alive.current) return;
                 setState({ status: 'ready', data, stale, fetchedAt });
+
+                // Stale-while-revalidate. The cache makes the page render
+                // instantly, but a visitor comparing against the real profile
+                // should not be looking at numbers hours old, so anything past
+                // the soft window is refreshed in the background and swapped in
+                // when it lands.
+                if (!force && Date.now() - fetchedAt > SOFT_TTL) {
+                    getStats(platform, handle, { force: true })
+                        .then((fresh) => {
+                            if (!alive.current) return;
+                            setState({
+                                status: 'ready',
+                                data: fresh.data,
+                                stale: fresh.stale,
+                                fetchedAt: fresh.fetchedAt,
+                            });
+                        })
+                        .catch(() => {
+                            // The cached values are already on screen; a failed
+                            // background refresh should change nothing.
+                        });
+                }
             } catch {
                 if (!alive.current) return;
                 setState({ status: 'error', data: null, stale: false, fetchedAt: null });
