@@ -89,7 +89,7 @@ export default function CommandPalette({ scrollToSection }) {
             role="presentation"
         >
             <div className="panel w-full max-w-lg" onClick={(e) => e.stopPropagation()} role="dialog" aria-label="Command palette">
-                <div className="flex items-center gap-3 px-4 py-3 border-b border-line">
+                <div className="field flex items-center gap-3 px-4 py-3 border-b border-line">
                     <Search size={14} className="text-ink-dim shrink-0" />
                     <input
                         ref={inputRef}
@@ -97,7 +97,7 @@ export default function CommandPalette({ scrollToSection }) {
                         onChange={(e) => { setQuery(e.target.value); setCursor(0); }}
                         onKeyDown={onKeyDown}
                         placeholder="type a command"
-                        className="flex-1 mono text-xs bg-transparent text-ink-bright placeholder-ink-dim focus:outline-none min-w-0"
+                        className="flex-1 mono text-xs bg-transparent text-ink-bright placeholder-ink-dim min-w-0"
                     />
                     <kbd className="mono text-[9px] text-ink-dim border border-line px-1.5 py-0.5 shrink-0">esc</kbd>
                 </div>

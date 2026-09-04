@@ -69,7 +69,7 @@ body {
 /* ---------------------------- panel chrome ---------------------------- */
 
 .panel {
-    background: rgba(13, 17, 23, 0.9);
+    background: rgba(13, 17, 23, 0.92);
     border: 1px solid #1e2530;
     position: relative;
     transition: border-color 0.18s ease;
@@ -425,4 +425,45 @@ body {
    element reads calmer and costs less. */
 .section-visible .panel::after {
     content: none;
+}
+
+/* -------------------------- keyboard affordances ----------------------- */
+
+/* Nothing on the page showed a focus ring, so tabbing through it was invisible
+   -- a straight WCAG 2.4.7 failure. :focus-visible keeps pointer clicks clean
+   while giving keyboard users a real indicator. */
+:focus-visible {
+    outline: 2px solid #3fb950;
+    outline-offset: 2px;
+}
+
+/* On a dark inset field an outline reads better as a border change. */
+input:focus-visible {
+    outline: none;
+}
+
+.field:focus-within {
+    border-color: #3fb950;
+}
+
+/* Visible only once focused, as the first stop in the tab order. */
+.skip-link {
+    position: fixed;
+    top: 8px;
+    left: 8px;
+    z-index: 200;
+    transform: translateY(-160%);
+    transition: transform 0.15s ease;
+    background: #3fb950;
+    color: #0a0c10;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 10px 14px;
+}
+
+.skip-link:focus {
+    transform: translateY(0);
 }

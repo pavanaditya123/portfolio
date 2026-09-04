@@ -15,6 +15,7 @@ import ConsoleBackground from './components/ConsoleBackground';
 import BootSequence from './components/BootSequence';
 import Crosshair from './components/Crosshair';
 import CommandPalette from './components/CommandPalette';
+import EdgeGlow from './components/EdgeGlow';
 import AIChatbot from './AIChatbot';
 
 const App = () => {
@@ -73,8 +74,10 @@ const App = () => {
 
     return (
         <div className="min-h-screen relative">
+            <a href="#main" className="skip-link">skip to content</a>
             <BootSequence />
             <ConsoleBackground />
+            <EdgeGlow />
             <Crosshair />
             <CommandPalette scrollToSection={scrollToSection} />
             <div className="scroll-rail" style={{ width: `${progress}%` }} aria-hidden="true" />
@@ -86,13 +89,16 @@ const App = () => {
                 scrollToSection={scrollToSection}
             />
 
-            <main className="max-w-5xl mx-auto px-5 pt-20 pb-12 relative z-10">
+            <main id="main" className="max-w-5xl mx-auto px-5 pt-20 pb-12 relative z-10">
                 <Hero scrollToSection={scrollToSection} />
-                <About />
+                {/* Proof before narrative: a recruiter scanning for twenty
+                    seconds should hit the roles and the live numbers before
+                    any prose. About moves below them. */}
                 <Experience />
                 <Projects />
-                <Skills />
                 <CodingProfiles />
+                <Skills />
+                <About />
                 <Achievements />
                 <Resume />
                 <Contact />

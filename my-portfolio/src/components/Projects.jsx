@@ -12,7 +12,7 @@ const TONE = {
 
 const Projects = () => (
     <section id="projects" className="py-14 reveal-section section-hidden">
-        <SectionHeader index="03" title="Services" note={`${projects.length} deployed`} />
+        <SectionHeader index="02" title="Services" note={`${projects.length} deployed`} />
 
         <div className="space-y-3">
             {projects.map((p, idx) => {

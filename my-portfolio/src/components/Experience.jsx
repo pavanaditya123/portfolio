@@ -15,7 +15,7 @@ const stateOf = (job) => {
 
 const Experience = () => (
     <section id="experience" className="py-14 reveal-section section-hidden">
-        <SectionHeader index="02" title="Deployment log" note={`${experience.length} entries`} />
+        <SectionHeader index="01" title="Deployment log" note={`${experience.length} entries`} />
 
         <div className="space-y-3">
             {experience.map((job) => {

@@ -215,7 +215,7 @@ const AIChatbot = () => {
                         </div>
                     )}
 
-                    <div className="border-t border-line p-2.5 flex gap-2 shrink-0">
+                    <div className="field border-t border-line p-2.5 flex gap-2 shrink-0">
                         <span className="mono text-xs text-signal self-center pl-1.5">›</span>
                         <input
                             ref={inputRef}
@@ -224,7 +224,7 @@ const AIChatbot = () => {
                             onChange={(e) => setInput(e.target.value)}
                             onKeyDown={handleKeyDown}
                             placeholder="ask about pavan"
-                            className="flex-1 mono text-[11px] bg-transparent text-ink-bright placeholder-ink-dim focus:outline-none min-w-0"
+                            className="flex-1 mono text-[11px] bg-transparent text-ink-bright placeholder-ink-dim min-w-0"
                         />
                         <button
                             onClick={handleSend}

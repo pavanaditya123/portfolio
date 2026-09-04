@@ -3,8 +3,8 @@ import { Menu, X, Download } from 'lucide-react';
 import { RESUME_PATH } from '../data/profile';
 
 const NAV_ITEMS = [
-    ['01', 'about'], ['02', 'experience'], ['03', 'projects'],
-    ['04', 'skills'], ['05', 'coding'], ['06', 'resume'], ['07', 'contact'],
+    ['01', 'experience'], ['02', 'projects'], ['03', 'coding'],
+    ['04', 'skills'], ['05', 'about'], ['06', 'resume'], ['07', 'contact'],
 ];
 
 const Navbar = ({ activeSection, mobileMenuOpen, setMobileMenuOpen, scrollToSection }) => (

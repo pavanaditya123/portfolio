@@ -251,7 +251,7 @@ const CodingProfiles = () => {
     return (
         <section id="coding" className="py-14 reveal-section section-hidden">
             <div className="flex items-baseline gap-4 mb-6 border-b border-line pb-3">
-                <span className="mono text-signal text-xs font-bold">05</span>
+                <span className="mono text-signal text-xs font-bold">03</span>
                 <h2 className="mono text-sm font-bold text-ink-bright uppercase tracking-[0.14em]">
                     Live telemetry
                 </h2>
