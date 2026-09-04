@@ -18,8 +18,8 @@
 
     --color-ink: #c9d1d9;
     --color-ink-bright: #f0f6fc;
-    --color-ink-mute: #6e7781;
-    --color-ink-dim: #4a515c;
+    --color-ink-mute: #8b949e;
+    --color-ink-dim: #767e8a;
 
     --color-signal: #3fb950;
     --color-warn: #d29922;
@@ -124,7 +124,7 @@ body {
     font-weight: 600;
     letter-spacing: 0.09em;
     text-transform: uppercase;
-    color: #6e7781;
+    color: #8b949e;
 }
 
 /* --------------------------- status indicators ------------------------- */
@@ -176,7 +176,7 @@ body {
     font-weight: 600;
     letter-spacing: 0.09em;
     text-transform: uppercase;
-    color: #6e7781;
+    color: #8b949e;
 }
 
 /* ------------------------------ background ----------------------------- */
@@ -201,7 +201,7 @@ body {
     inset: 0;
     z-index: 1;
     pointer-events: none;
-    opacity: 0.35;
+    opacity: 0.16;
     background: repeating-linear-gradient(0deg,
             transparent 0px,
             transparent 2px,
@@ -295,11 +295,11 @@ body {
 
     0%,
     100% {
-        opacity: 0.35;
+        opacity: 0.16;
     }
 
     50% {
-        opacity: 0.28;
+        opacity: 0.12;
     }
 }
 
