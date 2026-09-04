@@ -100,22 +100,11 @@ The **refresh** button next to the LIVE badge forces a fetch past the cache.
 
 ## Deploying
 
-**Vercel** — already configured. The app lives in `my-portfolio/` but the git
-repo root is one level up, so a default import would not find `package.json`.
-The `vercel.json` at the repo root handles that:
-
-```json
-{
-  "installCommand": "npm install --prefix my-portfolio",
-  "buildCommand": "npm run build --prefix my-portfolio",
-  "outputDirectory": "my-portfolio/dist"
-}
-```
-
-Import the repo on Vercel and leave Root Directory as the repo root — no other
-setup. Every push to `main` redeploys automatically. (If you instead set Root
-Directory to `my-portfolio`, Vercel auto-detects Vite and ignores this file;
-that works too.)
+**Vercel** — import the repo and set **Root Directory** to `my-portfolio` in
+the project settings. The Vite app lives one level below the git root, so
+without that Vercel looks for `package.json` at the top level and the build
+fails. With it set, Vercel auto-detects Vite and needs nothing else; every push
+to `main` redeploys.
 
 Because the stats are fetched in the browser, the deployed numbers keep climbing
 without any rebuild.
