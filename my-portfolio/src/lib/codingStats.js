@@ -10,6 +10,42 @@
 const CACHE_TTL = 6 * 60 * 60 * 1000; // 6 hours
 const TIMEOUT = 12000;
 
+/* ------------------------------ event bus ------------------------------- */
+
+// The log panel on the page subscribes to these. Emitting from here rather
+// than from the components means the stream shows what actually happened in
+// the network layer -- cache hits, upstream failures, stale fallbacks -- and
+// not a scripted animation pretending to be one.
+const listeners = new Set();
+const buffer = [];
+const BUFFER_MAX = 20;
+let seq = 0;
+
+/**
+ * Subscribe to network events. Buffered events are replayed immediately, so a
+ * panel that mounts after the first fetches have already fired still shows
+ * them -- the hero's gauges start requesting before the log panel exists.
+ */
+export function onStatsEvent(cb) {
+    buffer.forEach(cb);
+    listeners.add(cb);
+    return () => listeners.delete(cb);
+}
+
+function emit(level, msg) {
+    seq += 1;
+    const event = { id: seq, level, msg, t: Date.now() };
+    buffer.push(event);
+    if (buffer.length > BUFFER_MAX) buffer.shift();
+    listeners.forEach((cb) => {
+        try {
+            cb(event);
+        } catch {
+            // A broken subscriber must not break a fetch.
+        }
+    });
+}
+
 const num = (v) => {
     const n = Number(v);
     return Number.isFinite(n) ? n : 0;
@@ -299,6 +335,9 @@ async function fetchGitHub(u) {
 
 /* -------------------------------- Public -------------------------------- */
 
+// platform:handle -> in-flight promise, so concurrent callers share one fetch.
+const inflight = new Map();
+
 const FETCHERS = {
     leetcode: fetchLeetCode,
     leetcodeContest: fetchLeetCodeContest,
@@ -319,17 +358,40 @@ export async function getStats(platform, handle, { force = false } = {}) {
 
     const cached = readCache(platform, handle);
     if (cached && !cached.expired && !force) {
+        const age = Math.round((Date.now() - cached.fetchedAt) / 1000);
+        emit('cache', `${platform} cache hit · age ${age}s`);
         return { data: cached.data, stale: false, fetchedAt: cached.fetchedAt };
     }
 
-    try {
-        const data = await fetcher(handle);
-        writeCache(platform, handle, data);
-        return { data, stale: false, fetchedAt: Date.now() };
-    } catch (err) {
-        if (cached) {
-            return { data: cached.data, stale: true, fetchedAt: cached.fetchedAt };
+    // Several components ask for the same platform on mount -- the hero gauges,
+    // the telemetry card and the assistant all want LeetCode. Without this they
+    // each open their own request, because the cache is only written once the
+    // first one lands. Sharing the in-flight promise collapses them into a
+    // single round trip.
+    const key = `${platform}:${handle}`;
+    const existing = inflight.get(key);
+    if (existing && !force) return existing;
+
+    const run = (async () => {
+        emit('req', `GET ${platform}/${handle}`);
+        const started = performance.now();
+        try {
+            const data = await fetcher(handle);
+            writeCache(platform, handle, data);
+            emit('ok', `${platform} 200 · ${Math.round(performance.now() - started)}ms`);
+            return { data, stale: false, fetchedAt: Date.now() };
+        } catch (err) {
+            if (cached) {
+                emit('warn', `${platform} upstream down · serving stale`);
+                return { data: cached.data, stale: true, fetchedAt: cached.fetchedAt };
+            }
+            emit('err', `${platform} unreachable · no cache`);
+            throw err;
+        } finally {
+            inflight.delete(key);
         }
-        throw err;
-    }
+    })();
+
+    inflight.set(key, run);
+    return run;
 }

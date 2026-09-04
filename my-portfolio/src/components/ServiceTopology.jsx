@@ -60,7 +60,10 @@ export default function ServiceTopology() {
                 <style>{`
                     @keyframes dashFlow { to { stroke-dashoffset: -12; } }
                     .flow { stroke-dasharray: 3 3; animation: dashFlow 1.1s linear infinite; }
-                    @media (prefers-reduced-motion: reduce) { .flow { animation: none; } }
+                    @media (prefers-reduced-motion: reduce) {
+                        .flow { animation: none; }
+                        .packet { display: none; }
+                    }
                 `}</style>
 
                 {EDGES.map(([from, to, tone]) => (
@@ -73,6 +76,19 @@ export default function ServiceTopology() {
                         className={tone === '#2f3947' ? undefined : 'flow'}
                         opacity={tone === '#2f3947' ? 0.9 : 0.75}
                     />
+                ))}
+
+                {/* Packets riding the async edges. animateMotion follows the same
+                    path data as the edge, so they track it exactly. */}
+                {EDGES.filter(([, , tone]) => tone !== '#2f3947').map(([from, to, tone], i) => (
+                    <circle key={`pkt-${from}-${to}`} r="2" fill={tone} className="packet">
+                        <animateMotion
+                            dur={`${2.6 + i * 0.35}s`}
+                            repeatCount="indefinite"
+                            path={elbow(from, to)}
+                            begin={`${i * 0.45}s`}
+                        />
+                    </circle>
                 ))}
 
                 {NODES.map((n) => (

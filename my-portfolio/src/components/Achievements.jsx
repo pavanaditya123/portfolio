@@ -38,10 +38,12 @@ const Achievements = () => (
                 {certifications.map((c) => (
                     <div
                         key={c.title}
-                        className="px-5 py-4 border-b border-line last:border-0 flex items-baseline justify-between gap-4"
+                        className="px-5 py-4 border-b border-line last:border-0 flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-1 sm:gap-5"
                     >
                         <span className="text-sm text-ink-bright">{c.title}</span>
-                        <span className="mono text-[10px] text-ink-dim shrink-0 text-right">{c.issuer}</span>
+                        {/* Long issuers ("takeUforward (Raj Vikramaditya)") blow out a
+                            narrow row, so they stack under the title on phones. */}
+                        <span className="mono text-[10px] text-ink-dim sm:text-right min-w-0">{c.issuer}</span>
                     </div>
                 ))}
             </Panel>

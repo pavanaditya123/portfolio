@@ -7,6 +7,7 @@ import useCountUp from '../hooks/useCountUp';
 import { computeStreaks } from '../lib/codingStats';
 import { SectionHeader, Panel, Readout, MetricRow } from './ui';
 import Heatmap from './Heatmap';
+import LogStream from './LogStream';
 
 const AnimatedNumber = ({ value, className = '' }) => {
     const shown = useCountUp(value);
@@ -274,6 +275,7 @@ const CodingProfiles = () => {
             </p>
 
             <div className="space-y-3">
+                <LogStream />
                 <LeetCodeCard nonce={nonce} />
                 <GitHubCard nonce={nonce} />
                 <div className="grid md:grid-cols-2 gap-3">

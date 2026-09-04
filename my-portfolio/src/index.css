@@ -263,3 +263,84 @@ body {
         transform: none;
     }
 }
+
+/* --------------------------- phosphor / CRT ---------------------------- */
+
+/* A faint bloom on monospace text, the way a phosphor display smears. Kept
+   very low: enough to feel like a screen, not enough to hurt legibility. */
+.mono,
+.num,
+.label {
+    text-shadow: 0 0 14px rgba(63, 185, 80, 0.055);
+}
+
+.text-signal {
+    text-shadow: 0 0 16px rgba(63, 185, 80, 0.22);
+}
+
+.text-info {
+    text-shadow: 0 0 16px rgba(88, 166, 255, 0.2);
+}
+
+.text-accent {
+    text-shadow: 0 0 16px rgba(188, 140, 255, 0.2);
+}
+
+.text-warn {
+    text-shadow: 0 0 16px rgba(210, 153, 34, 0.2);
+}
+
+/* Slow luminance drift across the page, like a CRT settling. */
+@keyframes crtDrift {
+
+    0%,
+    100% {
+        opacity: 0.35;
+    }
+
+    50% {
+        opacity: 0.28;
+    }
+}
+
+.scanline {
+    animation: crtDrift 7s ease-in-out infinite;
+}
+
+/* Sweep that runs down a panel when it first scrolls into view. */
+@keyframes sweep {
+    0% {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+
+    35% {
+        opacity: 1;
+    }
+
+    100% {
+        transform: translateY(100%);
+        opacity: 0;
+    }
+}
+
+.section-visible .panel::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(180deg, transparent, rgba(63, 185, 80, 0.05), transparent);
+    animation: sweep 0.9s ease-out 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .scanline,
+    .section-visible .panel::after {
+        animation: none;
+    }
+
+    .section-visible .panel::after {
+        content: none;
+    }
+}

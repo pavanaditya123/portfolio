@@ -12,6 +12,9 @@ import Achievements from './components/Achievements';
 import Resume from './components/Resume';
 import Contact from './components/Contact';
 import ConsoleBackground from './components/ConsoleBackground';
+import BootSequence from './components/BootSequence';
+import Crosshair from './components/Crosshair';
+import CommandPalette from './components/CommandPalette';
 import AIChatbot from './AIChatbot';
 
 const App = () => {
@@ -70,7 +73,10 @@ const App = () => {
 
     return (
         <div className="min-h-screen relative">
+            <BootSequence />
             <ConsoleBackground />
+            <Crosshair />
+            <CommandPalette scrollToSection={scrollToSection} />
             <div className="scroll-rail" style={{ width: `${progress}%` }} aria-hidden="true" />
 
             <Navbar
