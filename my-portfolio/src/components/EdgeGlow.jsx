@@ -15,7 +15,7 @@ import React, { useRef, useEffect } from 'react';
 
 const FPS = 30;
 const RADIUS = 420;
-const IDLE_AFTER = 2600; // ms before the light resumes drifting
+const CURSOR_FADE = 1500; // ms of stillness before the cursor light fades out
 
 export default function EdgeGlow() {
     const canvasRef = useRef(null);
@@ -44,6 +44,7 @@ export default function EdgeGlow() {
         // Rects are read on scroll/resize rather than per frame, so the draw
         // loop never forces layout.
         let rects = [];
+        let panelPath = new Path2D();
         let rectsDirty = true;
         const markDirty = () => { rectsDirty = true; };
 
@@ -55,18 +56,26 @@ export default function EdgeGlow() {
                 found.push(r);
             }
             rects = found;
+            // Built once per layout change and re-stroked by every light.
+            panelPath = new Path2D();
+            for (const r of found) panelPath.rect(r.left, r.top, r.width, r.height);
             rectsDirty = false;
         };
 
-        // Seeded on-screen rather than off it, so the very first frame already
-        // lights something -- otherwise the glow is absent entirely wherever
-        // requestAnimationFrame does not run, and swoops in from a corner where it does.
-        const light = { x: 0, y: 0, tx: 0, ty: 0 };
-        let lastPointer = 0;
+        // Two independent lights. The roaming one never stops, so the edges are
+        // alive whether or not anyone touches the page; the cursor light is
+        // additional, and fades away when the pointer goes still.
+        const roam = { x: 0, y: 0 };
+        const cursor = { x: -900, y: -900, tx: -900, ty: -900, alpha: 0 };
+        let lastPointer = -Infinity;
 
         const onMove = (e) => {
-            light.tx = e.clientX;
-            light.ty = e.clientY;
+            cursor.tx = e.clientX;
+            cursor.ty = e.clientY;
+            if (cursor.alpha === 0) {
+                cursor.x = e.clientX;
+                cursor.y = e.clientY;
+            }
             lastPointer = performance.now();
         };
 
@@ -75,54 +84,55 @@ export default function EdgeGlow() {
         let running = true;
         const onVis = () => { running = !document.hidden; };
 
+        // One light -> gradient stroke over the shared panel path.
+        function strokeLight(x, y, intensity) {
+            if (intensity <= 0.01) return;
+
+            const grad = ctx.createRadialGradient(x, y, 0, x, y, RADIUS);
+            grad.addColorStop(0, `rgba(63,185,80,${1 * intensity})`);
+            grad.addColorStop(0.28, `rgba(63,185,80,${0.72 * intensity})`);
+            grad.addColorStop(0.62, `rgba(63,185,80,${0.26 * intensity})`);
+            grad.addColorStop(1, 'rgba(63,185,80,0)');
+            ctx.strokeStyle = grad;
+            ctx.lineWidth = 1.6;
+            ctx.stroke(panelPath);
+
+            ctx.save();
+            ctx.globalCompositeOperation = 'lighter';
+            const core = ctx.createRadialGradient(x, y, 0, x, y, RADIUS * 0.42);
+            core.addColorStop(0, `rgba(150,255,180,${0.8 * intensity})`);
+            core.addColorStop(1, 'rgba(63,185,80,0)');
+            ctx.strokeStyle = core;
+            ctx.lineWidth = 1.6;
+            ctx.stroke(panelPath);
+            ctx.restore();
+
+            const amb = ctx.createRadialGradient(x, y, 0, x, y, RADIUS * 1.15);
+            amb.addColorStop(0, `rgba(63,185,80,${0.06 * intensity})`);
+            amb.addColorStop(1, 'rgba(63,185,80,0)');
+            ctx.fillStyle = amb;
+            ctx.fillRect(x - RADIUS * 1.15, y - RADIUS * 1.15, RADIUS * 2.3, RADIUS * 2.3);
+        }
+
         function paint(now) {
             if (rectsDirty) readRects();
+            const t = now / 1000;
 
-            // Drift when the pointer has gone quiet, so the effect is alive
-            // even before anyone touches the page.
-            if (now - lastPointer > IDLE_AFTER) {
-                const t = now / 1000;
-                light.tx = w * (0.5 + 0.42 * Math.sin(t * 0.21));
-                light.ty = h * (0.5 + 0.38 * Math.sin(t * 0.29 + 1.1));
-            }
+            // Lissajous with incommensurate periods (~13s and ~19s), so the
+            // path does not visibly repeat. Fast enough to read as motion.
+            roam.x = w * (0.5 + 0.46 * Math.sin(t * 0.48));
+            roam.y = h * (0.5 + 0.42 * Math.sin(t * 0.33 + 1.1));
 
-            light.x += (light.tx - light.x) * 0.085;
-            light.y += (light.ty - light.y) * 0.085;
+            cursor.x += (cursor.tx - cursor.x) * 0.14;
+            cursor.y += (cursor.ty - cursor.y) * 0.14;
+            const wanted = now - lastPointer < CURSOR_FADE ? 1 : 0;
+            cursor.alpha += (wanted - cursor.alpha) * 0.09;
 
             ctx.clearRect(0, 0, w, h);
             if (!rects.length) return;
 
-            const grad = ctx.createRadialGradient(light.x, light.y, 0, light.x, light.y, RADIUS);
-            grad.addColorStop(0, 'rgba(63,185,80,1)');
-            grad.addColorStop(0.28, 'rgba(63,185,80,0.72)');
-            grad.addColorStop(0.62, 'rgba(63,185,80,0.26)');
-            grad.addColorStop(1, 'rgba(63,185,80,0)');
-
-            // Every edge in one path, lit by one gradient, in one stroke.
-            ctx.beginPath();
-            for (const r of rects) ctx.rect(r.left, r.top, r.width, r.height);
-
-            ctx.strokeStyle = grad;
-            ctx.lineWidth = 1.6;
-            ctx.stroke();
-
-            // A second, tighter pass gives the very centre a hot core.
-            ctx.save();
-            ctx.globalCompositeOperation = 'lighter';
-            const core = ctx.createRadialGradient(light.x, light.y, 0, light.x, light.y, RADIUS * 0.42);
-            core.addColorStop(0, 'rgba(150,255,180,0.8)');
-            core.addColorStop(1, 'rgba(63,185,80,0)');
-            ctx.strokeStyle = core;
-            ctx.lineWidth = 1.6;
-            ctx.stroke();
-            ctx.restore();
-
-            // Faint ambient wash so the light reads on the background too.
-            const amb = ctx.createRadialGradient(light.x, light.y, 0, light.x, light.y, RADIUS * 1.15);
-            amb.addColorStop(0, 'rgba(63,185,80,0.06)');
-            amb.addColorStop(1, 'rgba(63,185,80,0)');
-            ctx.fillStyle = amb;
-            ctx.fillRect(light.x - RADIUS * 1.15, light.y - RADIUS * 1.15, RADIUS * 2.3, RADIUS * 2.3);
+            strokeLight(roam.x, roam.y, 1);
+            strokeLight(cursor.x, cursor.y, cursor.alpha);
         }
 
         function loop(now) {
@@ -134,10 +144,6 @@ export default function EdgeGlow() {
         }
 
         resize();
-        light.x = w * 0.5;
-        light.y = h * 0.42;
-        light.tx = light.x;
-        light.ty = light.y;
         readRects();
         paint(performance.now());
         if (!reduced) raf = requestAnimationFrame(loop);
