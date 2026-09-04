@@ -185,15 +185,16 @@ body {
    field was the single most template-looking thing on the old page. */
 .console-grid {
     position: fixed;
-    inset: 0;
+    inset: -260px 0;
     z-index: -10;
+    will-change: transform;
     pointer-events: none;
     background-image:
         linear-gradient(rgba(47, 57, 71, 0.28) 1px, transparent 1px),
         linear-gradient(90deg, rgba(47, 57, 71, 0.28) 1px, transparent 1px);
     background-size: 64px 64px;
-    mask-image: radial-gradient(ellipse 120% 90% at 50% 0%, #000 15%, transparent 75%);
-    -webkit-mask-image: radial-gradient(ellipse 120% 90% at 50% 0%, #000 15%, transparent 75%);
+    mask-image: radial-gradient(ellipse 120% 70% at 50% 22%, #000 15%, transparent 72%);
+    -webkit-mask-image: radial-gradient(ellipse 120% 70% at 50% 22%, #000 15%, transparent 72%);
 }
 
 .scanline {
@@ -343,4 +344,74 @@ body {
     .section-visible .panel::after {
         content: none;
     }
+}
+
+/* ---------------------- scroll-driven choreography --------------------- */
+
+/* Native scroll-driven animations run on the compositor, so panels track the
+   scroll position without a scroll listener and without touching the main
+   thread. Browsers without support simply keep the IntersectionObserver
+   reveal that is already in place, so nothing is lost. */
+@supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+
+        /* The observer adds .section-visible; opt out of its transform so the
+           two systems never fight over the same property. */
+        .reveal-section .panel {
+            animation: panelRise linear both;
+            animation-timeline: view();
+            animation-range: entry 5% cover 26%;
+        }
+
+        @keyframes panelRise {
+            from {
+                opacity: 0;
+                transform: translate3d(0, 26px, 0) scale(0.988);
+            }
+
+            to {
+                opacity: 1;
+                transform: none;
+            }
+        }
+
+        /* Section rules draw themselves in as they enter. */
+        .reveal-section>.border-b {
+            animation: ruleDraw linear both;
+            animation-timeline: view();
+            animation-range: entry 10% cover 20%;
+        }
+
+        @keyframes ruleDraw {
+            from {
+                clip-path: inset(0 100% 0 0);
+            }
+
+            to {
+                clip-path: inset(0 0 0 0);
+            }
+        }
+
+        /* Parallax drift on the background grid, tied to page scroll. */
+        .console-grid {
+            animation: gridDrift linear both;
+            animation-timeline: scroll(root block);
+        }
+
+        @keyframes gridDrift {
+            from {
+                transform: translate3d(0, 0, 0);
+            }
+
+            to {
+                transform: translate3d(0, -220px, 0);
+            }
+        }
+    }
+}
+
+/* The sweep flash fought the new scroll choreography -- one motion per
+   element reads calmer and costs less. */
+.section-visible .panel::after {
+    content: none;
 }

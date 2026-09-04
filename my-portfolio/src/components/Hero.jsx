@@ -3,6 +3,7 @@ import { ArrowRight, Download } from 'lucide-react';
 import { profile, links, contact, education, RESUME_PATH } from '../data/profile';
 import { Panel, Status } from './ui';
 import StatsBar from './StatsBar';
+import AsciiName from './AsciiName';
 
 const TYPE_SPEED = 52;
 const ERASE_SPEED = 26;
@@ -61,9 +62,7 @@ const Hero = ({ scrollToSection }) => {
                     <Status tone="signal">available</Status>
                 </div>
 
-                <h1 className="mono text-4xl md:text-6xl font-extrabold text-ink-bright tracking-tight leading-[1.05] mb-5">
-                    {profile.name.split(' ').slice(-2).join(' ')}
-                </h1>
+                <AsciiName className="mb-6 -mx-1" />
 
                 <p className="mono text-base md:text-lg text-signal mb-8 min-h-[1.75rem]">
                     <span className="text-ink-dim">$ </span>
