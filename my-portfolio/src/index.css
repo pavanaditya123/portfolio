@@ -19,7 +19,7 @@
     --color-ink: #c9d1d9;
     --color-ink-bright: #f0f6fc;
     --color-ink-mute: #8b949e;
-    --color-ink-dim: #767e8a;
+    --color-ink-dim: #848d97;
 
     --color-signal: #3fb950;
     --color-warn: #d29922;
@@ -69,7 +69,7 @@ body {
 /* ---------------------------- panel chrome ---------------------------- */
 
 .panel {
-    background: #0d1117;
+    background: rgba(13, 17, 23, 0.9);
     border: 1px solid #1e2530;
     position: relative;
     transition: border-color 0.18s ease;
@@ -118,7 +118,7 @@ body {
     gap: 0.625rem;
     padding: 0.5rem 0.875rem;
     border-bottom: 1px solid #1e2530;
-    background: #11161e;
+    background: rgba(17, 22, 30, 0.9);
     font-family: 'JetBrains Mono', ui-monospace, monospace;
     font-size: 10.5px;
     font-weight: 600;
@@ -180,6 +180,17 @@ body {
 }
 
 /* ------------------------------ background ----------------------------- */
+
+/* Pulls focus back to the middle of the page: the instrument field is busiest
+   at the edges, and this stops it fighting the panels for attention. */
+.console-vignette {
+    position: fixed;
+    inset: 0;
+    z-index: -8;
+    pointer-events: none;
+    background:
+        radial-gradient(ellipse 78% 62% at 50% 45%, transparent 38%, rgba(10, 12, 16, 0.82) 100%);
+}
 
 /* Graph-paper grid, faded at the edges. Static -- the animated particle
    field was the single most template-looking thing on the old page. */
